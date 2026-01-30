@@ -12,14 +12,23 @@ User = get_user_model()
 class TestLogic(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.author = User.objects.create_user(username="author", password="pass12345")
-        cls.other = User.objects.create_user(username="other", password="pass12345")
+        cls.author = User.objects.create_user(
+            username="author",
+            password="pass12345",
+        )
+        cls.other = User.objects.create_user(
+            username="other",
+            password="pass12345",
+        )
 
         cls.add_url = reverse("notes:add")
         cls.success_url = reverse("notes:success")
 
         cls.note = Note.objects.create(
-            title="My note", text="Text", slug="my-note", author=cls.author
+            title="My note",
+            text="Text",
+            slug="my-note",
+            author=cls.author,
         )
         cls.edit_url = reverse("notes:edit", args=(cls.note.slug,))
         cls.delete_url = reverse("notes:delete", args=(cls.note.slug,))
@@ -28,16 +37,21 @@ class TestLogic(TestCase):
         # anonymous -> redirect
         before = Note.objects.count()
         resp = self.client.post(
-            self.add_url, data={"title": "T", "text": "X", "slug": "t"}
+            self.add_url,
+            data={"title": "T", "text": "X", "slug": "t"},
         )
-        self.assertRedirects(resp, f"{settings.LOGIN_URL}?next={self.add_url}")
+        self.assertRedirects(
+            resp,
+            f"{settings.LOGIN_URL}?next={self.add_url}",
+        )
         self.assertEqual(Note.objects.count(), before)
 
         # logged in -> create ok
         self.client.login(username="author", password="pass12345")
         before = Note.objects.count()
         resp = self.client.post(
-            self.add_url, data={"title": "T2", "text": "X2", "slug": "t2"}
+            self.add_url,
+            data={"title": "T2", "text": "X2", "slug": "t2"},
         )
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(Note.objects.count(), before + 1)
@@ -51,7 +65,8 @@ class TestLogic(TestCase):
             self.add_url,
             data={"title": "Another", "text": "X", "slug": "my-note"},
         )
-        self.assertEqual(resp.status_code, 200)  # форма вернулась с ошибкой
+        # форма вернулась с ошибкой
+        self.assertEqual(resp.status_code, 200)
         self.assertEqual(Note.objects.count(), before)
 
         form = resp.context["form"]
@@ -62,7 +77,10 @@ class TestLogic(TestCase):
 
         title = "Привет мир"
         before = Note.objects.count()
-        resp = self.client.post(self.add_url, data={"title": title, "text": "X", "slug": ""})
+        resp = self.client.post(
+            self.add_url,
+            data={"title": title, "text": "X", "slug": ""},
+        )
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(Note.objects.count(), before + 1)
 
@@ -75,7 +93,11 @@ class TestLogic(TestCase):
 
         resp_edit = self.client.post(
             self.edit_url,
-            data={"title": "Updated", "text": "New", "slug": self.note.slug},
+            data={
+                "title": "Updated",
+                "text": "New",
+                "slug": self.note.slug,
+            },
         )
         self.assertEqual(resp_edit.status_code, 302)
         self.note.refresh_from_db()
@@ -91,7 +113,11 @@ class TestLogic(TestCase):
 
         resp_edit = self.client.post(
             self.edit_url,
-            data={"title": "Hacked", "text": "Hacked", "slug": self.note.slug},
+            data={
+                "title": "Hacked",
+                "text": "Hacked",
+                "slug": self.note.slug,
+            },
         )
         resp_delete = self.client.post(self.delete_url)
 

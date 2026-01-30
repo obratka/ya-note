@@ -10,14 +10,26 @@ User = get_user_model()
 class TestContent(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.author = User.objects.create_user(username="author", password="pass12345")
-        cls.other = User.objects.create_user(username="other", password="pass12345")
+        cls.author = User.objects.create_user(
+            username="author",
+            password="pass12345",
+        )
+        cls.other = User.objects.create_user(
+            username="other",
+            password="pass12345",
+        )
 
         cls.note_author = Note.objects.create(
-            title="A1", text="t", slug="a1", author=cls.author
+            title="A1",
+            text="t",
+            slug="a1",
+            author=cls.author,
         )
         cls.note_other = Note.objects.create(
-            title="B1", text="t", slug="b1", author=cls.other
+            title="B1",
+            text="t",
+            slug="b1",
+            author=cls.other,
         )
 
         cls.list_url = reverse("notes:list")

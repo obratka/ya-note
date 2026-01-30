@@ -21,11 +21,20 @@ def reverse_any(names):
 class TestRoutes(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.author = User.objects.create_user(username="author", password="pass12345")
-        cls.other = User.objects.create_user(username="other", password="pass12345")
+        cls.author = User.objects.create_user(
+            username="author",
+            password="pass12345",
+        )
+        cls.other = User.objects.create_user(
+            username="other",
+            password="pass12345",
+        )
 
         cls.note = Note.objects.create(
-            title="My note", text="Text", slug="my-note", author=cls.author
+            title="My note",
+            text="Text",
+            slug="my-note",
+            author=cls.author,
         )
 
         cls.home_url = reverse("notes:home")
@@ -37,9 +46,27 @@ class TestRoutes(TestCase):
         cls.delete_url = reverse("notes:delete", args=(cls.note.slug,))
 
         # auth urls могут называться по-разному, пробуем популярные варианты
-        cls.login_url = reverse_any(["users:login", "login", "accounts:login"])
-        cls.logout_url = reverse_any(["users:logout", "logout", "accounts:logout"])
-        cls.signup_url = reverse_any(["users:signup", "signup", "accounts:signup"])
+        cls.login_url = reverse_any(
+            [
+                "users:login",
+                "login",
+                "accounts:login",
+            ]
+        )
+        cls.logout_url = reverse_any(
+            [
+                "users:logout",
+                "logout",
+                "accounts:logout",
+            ]
+        )
+        cls.signup_url = reverse_any(
+            [
+                "users:signup",
+                "signup",
+                "accounts:signup",
+            ]
+        )
 
     def test_home_available_for_anonymous(self):
         resp = self.client.get(self.home_url)
@@ -78,12 +105,15 @@ class TestRoutes(TestCase):
         for url in protected:
             with self.subTest(url=url):
                 resp = self.client.get(url)
-                self.assertRedirects(resp, f"{settings.LOGIN_URL}?next={url}")
+                self.assertRedirects(
+                    resp,
+                    f"{settings.LOGIN_URL}?next={url}",
+                )
 
     def test_signup_login_logout_available_for_all(self):
         self.assertEqual(self.client.get(self.signup_url).status_code, 200)
         self.assertEqual(self.client.get(self.login_url).status_code, 200)
 
-        # logout часто бывает только POST; главное — доступен не только “особым” пользователям
+        # logout часто бывает только POST; главное — endpoint доступен
         resp = self.client.post(self.logout_url)
         self.assertIn(resp.status_code, (200, 302))
